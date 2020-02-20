@@ -8,6 +8,7 @@
 // System headers
 //
 #include <thread>
+#include <iostream>
 
 // Library headers
 //
@@ -18,6 +19,7 @@
 #include <sensor_msgs/image_encodings.h>
 #include <sensor_msgs/point_cloud2_iterator.h>
 #include <k4a/k4a.hpp>
+#include "azure_kinect_ros_driver/k4a_image_filter.h"
 
 // Project headers
 //
@@ -496,7 +498,7 @@ k4a_result_t K4AROSDevice::renderBGRA32ToROS(sensor_msgs::ImagePtr& rgb_image, k
 k4a_result_t K4AROSDevice::getRgbPointCloudInDepthFrame(const k4a::capture& capture,
                                                         sensor_msgs::PointCloud2Ptr& point_cloud)
 {
-  const k4a::image k4a_depth_frame = capture.get_depth_image();
+  k4a::image k4a_depth_frame = capture.get_depth_image();
   if (!k4a_depth_frame)
   {
     ROS_ERROR("Cannot render RGB point cloud: no depth frame");
@@ -509,6 +511,9 @@ k4a_result_t K4AROSDevice::getRgbPointCloudInDepthFrame(const k4a::capture& capt
     ROS_ERROR("Cannot render RGB point cloud: no BGRA frame");
     return K4A_RESULT_FAILED;
   }
+
+
+  K4AImageFilter::sharpFilter(k4a_depth_frame, params_.depth_sharpen_strength);
 
   // Transform color image into the depth camera frame:
   calibration_data_.k4a_transformation_.color_image_to_depth_camera(k4a_depth_frame, k4a_bgra_frame,
@@ -543,6 +548,9 @@ k4a_result_t K4AROSDevice::getRgbPointCloudInRgbFrame(const k4a::capture& captur
     return K4A_RESULT_FAILED;
   }
 
+
+  K4AImageFilter::sharpFilter(k4a_depth_frame, params_.depth_sharpen_strength);
+
   // transform depth image into color camera geometry
   calibration_data_.k4a_transformation_.depth_image_to_color_camera(k4a_depth_frame,
                                                                     &calibration_data_.transformed_depth_image_);
@@ -561,12 +569,14 @@ k4a_result_t K4AROSDevice::getRgbPointCloudInRgbFrame(const k4a::capture& captur
 k4a_result_t K4AROSDevice::getPointCloud(const k4a::capture& capture, sensor_msgs::PointCloud2Ptr& point_cloud)
 {
   k4a::image k4a_depth_frame = capture.get_depth_image();
-
+  exit(0);
   if (!k4a_depth_frame)
   {
     ROS_ERROR("Cannot render point cloud: no depth frame");
     return K4A_RESULT_FAILED;
   }
+
+  K4AImageFilter::sharpFilter(k4a_depth_frame, params_.depth_sharpen_strength);
 
   point_cloud->header.frame_id = calibration_data_.tf_prefix_ + calibration_data_.depth_camera_frame_;
   point_cloud->header.stamp = timestampToROS(k4a_depth_frame.get_device_timestamp());
@@ -617,7 +627,7 @@ k4a_result_t K4AROSDevice::fillColorPointCloud(const k4a::image& pointcloud_imag
     float z = static_cast<float>(point_cloud_buffer[3 * i + 2]);
     // Alpha value:
     uint8_t a = color_buffer[4 * i + 3];
-    if (z <= 0.0f || a == 0)
+    if (z <= params_.min_distance || a == 0)
     {
       *iter_x = *iter_y = *iter_z = std::numeric_limits<float>::quiet_NaN();
       *iter_r = *iter_g = *iter_b = 0;
@@ -662,7 +672,7 @@ k4a_result_t K4AROSDevice::fillPointCloud(const k4a::image& pointcloud_image, se
   {
     float z = static_cast<float>(point_cloud_buffer[3 * i + 2]);
 
-    if (z <= 0.0f)
+    if (z <= params_.min_distance)
     {
       *iter_x = *iter_y = *iter_z = std::numeric_limits<float>::quiet_NaN();
     }

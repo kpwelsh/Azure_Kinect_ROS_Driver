@@ -32,6 +32,9 @@ Licensed under the MIT License.
   <arg name="imu_rate_target" default="0"/>                       <!-- Desired output rate of IMU messages. Set to 0 (default) for full rate (1.6 kHz). --> 
   <arg name="wired_sync_mode" default="0"/>                       <!-- Wired sync mode. 0: OFF, 1: MASTER, 2: SUBORDINATE. --> 
   <arg name="subordinate_delay_off_master_usec" default="0"/>     <!-- Delay subordinate camera off master camera by specified amount in usec. --> 
+  <arg name="depth_sharpen_strength" default="0.0"/>     
+  <arg name="min_distance" default="0.0"/>     
+  
 
   <node pkg="azure_kinect_ros_driver" type="node" name="azure_kinect_ros_driver" output="screen" required="$(arg required)">
     <param name="depth_enabled"     type="bool"   value="$(arg depth_enabled)" />
@@ -54,5 +57,7 @@ Licensed under the MIT License.
     <param name="imu_rate_target" type="int" value="$(arg imu_rate_target)"/>
     <param name="wired_sync_mode" type="int" value="$(arg wired_sync_mode)"/>
     <param name="subordinate_delay_off_master_usec" type="int" value="$(arg subordinate_delay_off_master_usec)"/>
+    <param name="depth_sharpen_strength" type="double" value="$(arg depth_sharpen_strength)"/>
+    <param name="min_distance" type="double" value="$(arg min_distance)"/>
   </node>
 </launch>

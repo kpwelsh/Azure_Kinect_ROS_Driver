@@ -33,7 +33,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-#  INCLUDE_DIRS include
+  INCLUDE_DIRS include
 #  LIBRARIES k4a_ros_bridge
 #  CATKIN_DEPENDS roscpp std_msgs
 #  DEPENDS system_lib
@@ -52,6 +52,7 @@ add_executable(${PROJECT_NAME}_node
   src/k4a_ros_device.cpp
   src/k4a_ros_device_params.cpp
   src/k4a_calibration_transform_data.cpp
+  src/k4a_image_filter.cpp
   )
 
 target_compile_features(${PROJECT_NAME}_node PUBLIC cxx_std_11)
@@ -61,6 +62,7 @@ add_library(${PROJECT_NAME}_nodelet
   src/k4a_ros_device.cpp
   src/k4a_ros_device_params.cpp
   src/k4a_calibration_transform_data.cpp
+  src/k4a_image_filter.cpp
   )
 
 target_compile_features(${PROJECT_NAME}_nodelet PUBLIC cxx_std_11)

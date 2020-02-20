@@ -77,7 +77,13 @@
               int, 0)                                                                                                  \
   LIST_ENTRY(subordinate_delay_off_master_usec,                                                                        \
               "Delay subordinate camera off master camera by specified amount in usec.",                               \
-              int, 0)
+              int, 0)                                                                                                  \
+  LIST_ENTRY(depth_sharpen_strength,                                                                                   \
+              "Strength of the unsharp filter to apply to the depth image when processing",                            \
+              float, 0.0f)                                                                                             \
+  LIST_ENTRY(min_distance,                                                                                             \
+              "Minimum point distance to allow when publishing to points2, in millimeters.",                           \
+              float, 0.0f)
 
 class K4AROSDeviceParams
 {
